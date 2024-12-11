@@ -1,0 +1,92 @@
+clear;
+rng(0);
+data_bits= 64000;
+symbol=data_bits/2;
+b_data=randi([0,1],1 ,data_bits);
+qs=zeros(1,length(b_data)/2);
+
+for n =1:length(b_data)/2
+    even=b_data(2*n);
+    odd=b_data(2*n-1);
+
+    if(even==0)&&(odd==0)
+        qs(n)=0.707+0.707i;
+    end
+    if(even==1)&&(odd==0)
+        qs(n)=-0.707+0.707i;
+    end
+
+    if(even==0)&&(odd==1)
+        qs(n)=0.707-0.707i;
+    end
+    if(even==1)&&(odd==1)
+        qs(n)=-0.707-0.707i;
+    end
+end
+
+qpsk=qs;
+
+plot(real(qs),imag(qs),'o');
+axis([-1.2 1.2 -1.2 1.2]);
+grid('on');
+xlabel('real');
+ylabel('imag');
+title('qpsk constellation');
+
+
+
+
+clc;
+clear all;
+close all;
+nr_data_bits=8294;
+b_data=(randn(1,nr_data_bits))>.5;
+b=[b_data];
+d=zeros(1,length(b));
+for n=1:length(b)
+if(b(n)==0)
+d(n)=exp(j*2*pi);
+end
+if(b(n)==1)
+d(n)=exp(j*pi);
+end
+end
+disp(d)
+bpsk=d;
+figure(1);
+plot(d,'o');
+axis([-2 2 -2 2]);
+grid on;
+xlabel('real');
+ylabel('imag');
+title('BPSK constellation');
+SNR=0:20;
+BER1=[];
+SNR1=[];
+for SNR=0:length(SNR);
+sigma=sqrt(10.0^(-SNR/10.0));
+snbpsk=(real(bpsk)+sigma.*randn(size(bpsk)))+i.*(imag(bpsk)+sigma*randn(size(bpsk)));
+figure(2);
+plot(snbpsk,'o');
+axis([-2 2 -2 2]);
+grid on;
+xlabel('real');
+ylabel('imag');
+title('Bpsk constellation with noise');
+%receiver
+r=snbpsk;
+bhat=[real(r)<0];
+bhat=bhat(:)';
+bhat1=bhat;
+ne=sum(b~=bhat1);
+BER=ne/nr_data_bits;
+BER1=[BER1 BER];
+SNR1=[SNR1 SNR];
+end
+figure(3);
+semilogy(SNR1,BER1,'-*');
+grid on;
+xlabel('SNR=Eb/No(db)');
+ylabel('BER');
+title('Simulation of BER for BPSK ');
+legend('BER-simulated');
